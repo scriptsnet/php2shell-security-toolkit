@@ -1,0 +1,4 @@
+name,host,port,user,key_path
+# web-prod,192.0.2.10,2222,deploy,C:\Users\demo\.ssh\id_ed25519
+# web-backup,198.51.100.20,2222,ops,
+# app-1,198.51.100.21,2222,deploy,

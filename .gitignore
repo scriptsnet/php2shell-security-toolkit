@@ -1,0 +1,10 @@
+build/
+dist/
+release/
+reports/
+output/playwright/
+.playwright-cli/
+server/php2shell-fullfix-linux.zip
+tests/windows-php-overlay-*/
+__pycache__/
+*.pyc

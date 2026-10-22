@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>PHP2Shell 安全扫描器 · Web 版</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-a"></div>
+  <div class="ambient ambient-b"></div>
+  <main>
+    <header class="hero">
+      <div>
+        <div class="eyebrow">READ-ONLY SECURITY INVENTORY</div>
+        <h1>PHP2Shell 安全扫描器</h1>
+        <p>批量检查 CVE-2026-109618 / CVE-2026-109619。只盘点版本、SAPI、容器和缓解配置，不发送漏洞利用载荷，不修改服务器。</p>
+      </div>
+      <div class="hero-status">
+        <span class="dot"></span>
+        <span id="engineState">扫描引擎就绪</span>
+      </div>
+    </header>
+
+    <section class="grid-input">
+      <article class="card input-card">
+        <div class="card-head">
+          <div>
+            <h2>SSH 服务器</h2>
+            <p>每行：name,host,port,user,key_path；也可写 host 或 user@host:port。</p>
+          </div>
+          <div class="card-tools">
+            <button id="loadServersBtn" class="mini" type="button">导入 CSV</button>
+            <span class="badge">推荐</span>
+          </div>
+        </div>
+        <input id="serversFile" class="hidden" type="file" accept=".csv,.txt,text/csv,text/plain">
+        <textarea id="servers" spellcheck="false" placeholder="web-prod,192.0.2.10,2222,deploy,C:\Users\demo\.ssh\id_ed25519"></textarea>
+      </article>
+      <article class="card input-card">
+        <div class="card-head">
+          <div>
+            <h2>HTTP 目标</h2>
+            <p>每行一个 URL。仅读取响应头与有限页面文本，版本被隐藏时会标记为“无法确认”。</p>
+          </div>
+          <div class="card-tools">
+            <button id="loadTargetsBtn" class="mini" type="button">导入 TXT</button>
+            <span class="badge subtle">轻量</span>
+          </div>
+        </div>
+        <input id="targetsFile" class="hidden" type="file" accept=".txt,.csv,text/plain,text/csv">
+        <textarea id="targets" spellcheck="false" placeholder="https://example.com&#10;官网|https://www.example.com"></textarea>
+      </article>
+    </section>
+
+    <section class="card options-card">
+      <label class="field wide">
+        <span>默认 SSH 私钥</span>
+        <input id="keyPath" type="text" placeholder="C:\Users\demo\.ssh\id_ed25519">
+      </label>
+      <label class="field narrow">
+        <span>并发</span>
+        <input id="workers" type="number" min="1" max="64" value="8">
+      </label>
+      <label class="field narrow">
+        <span>超时 / 秒</span>
+        <input id="timeout" type="number" min="5" max="180" value="25">
+      </label>
+      <label class="check">
+        <input id="verifyTls" type="checkbox" checked>
+        <span>校验 TLS 证书</span>
+      </label>
+      <button id="scanBtn" class="primary">开始批量扫描</button>
+    </section>
+
+    <section id="errorBanner" class="error-banner hidden"></section>
+
+    <section class="progress-wrap card">
+      <div class="progress-head">
+        <strong id="progressText">等待扫描</strong>
+        <span id="progressCount">0 / 0</span>
+      </div>
+      <div class="progress-track"><div id="progressBar" class="progress-bar"></div></div>
+    </section>
+
+    <section id="summary" class="summary hidden">
+      <div class="stat total"><span>目标</span><strong id="statTotal">0</strong></div>
+      <div class="stat vulnerable"><span>存在漏洞</span><strong id="statVulnerable">0</strong></div>
+      <div class="stat at-risk"><span>高风险 / EOL</span><strong id="statRisk">0</strong></div>
+      <div class="stat fixed"><span>已修复</span><strong id="statFixed">0</strong></div>
+      <div class="stat unknown"><span>无法确认</span><strong id="statUnknown">0</strong></div>
+      <div class="stat error"><span>失败</span><strong id="statError">0</strong></div>
+    </section>
+
+    <section id="resultsSection" class="results-layout hidden">
+      <article class="card table-card">
+        <div class="card-head table-head">
+          <div>
+            <h2>扫描结果</h2>
+            <p>点击任一行查看证据和修复路径。</p>
+          </div>
+          <div class="export-actions">
+            <button data-format="html">HTML</button>
+            <button data-format="csv">CSV</button>
+            <button data-format="json">JSON</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>状态</th>
+                <th>服务器 / 目标</th>
+                <th>PHP 运行时</th>
+                <th>判定</th>
+              </tr>
+            </thead>
+            <tbody id="resultRows"></tbody>
+          </table>
+        </div>
+      </article>
+      <aside class="card detail-card">
+        <div class="detail-empty" id="detailEmpty">
+          <div class="scan-mark">⌁</div>
+          <h3>选择一条结果</h3>
+          <p>这里会展示版本证据、CVE 命中原因、修复命令和回滚要点。</p>
+        </div>
+        <div id="detailContent" class="detail-content hidden"></div>
+      </aside>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
